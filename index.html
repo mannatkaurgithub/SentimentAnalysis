@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis Web App</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        .container { max-width: 600px; margin: auto; }
+        h1 { text-align: center; }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; }
+        #result { text-align: center; margin-top: 20px; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sentiment Analysis</h1>
+        <p>Enter your text below and click Analyze to get the sentiment.</p>
+        <textarea id="text_input" rows="4" placeholder="Enter text here..."></textarea>
+        <button onclick="getSentiment()">Analyze Sentiment</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function getSentiment() {
+            const text = document.getElementById('text_input').value;
+
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text })
+            });
+
+            const result = await response.json();
+            document.getElementById('result').innerHTML = 
+                `<p>Sentiment: ${result.sentiment}</p><p>Score: ${result.score}</p>`;
+        }
+    </script>
+</body>
+</html>
