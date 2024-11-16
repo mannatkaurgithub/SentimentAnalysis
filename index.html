@@ -5,38 +5,176 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sentiment Analysis Web App</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 50px; }
-        .container { max-width: 600px; margin: auto; }
-        h1 { text-align: center; }
-        input, button { width: 100%; padding: 10px; margin: 10px 0; }
-        #result { text-align: center; margin-top: 20px; font-size: 20px; }
+        /* General Styles */
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, #007BFF, #00C6FF);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: white;
+            border-radius: 2px;
+            z-index: 2;
+        }
+
+        /* Container Styles */
+        .container {
+            background-color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px 30px;
+            max-width: 400px;
+            margin: 20px auto;
+            text-align: center;
+            flex: 1;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 20px;
+            font-size: 14px;
+            margin-top: auto;
+        }
+
+        /* Text Area Styles */
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            resize: none;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #007BFF;
+        }
+
+        /* Button Styles */
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Result Styles */
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        #result p {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Sentiment Analysis</h1>
-        <p>Enter your text below and click Analyze to get the sentiment.</p>
-        <textarea id="text_input" rows="4" placeholder="Enter text here..."></textarea>
-        <button onclick="getSentiment()">Analyze Sentiment</button>
+    <!-- Stylish Header -->
+    <header>
+        Sentiment Analysis
+    </header>
 
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Analyze Your Text</h1>
+        <p>Enter your text below and click Analyze to see the sentiment result.</p>
+        <textarea id="text_input" rows="5" placeholder="Enter your text here..."></textarea>
+        <button onclick="getSentiment()">Analyze Sentiment</button>
         <div id="result"></div>
     </div>
 
+    <!-- Footer -->
+    <footer>
+        Project by Mannat Kaur[21BCI0038], Tanishq Pahuja[21BCB0222] and Punya Kakkar[21BCE2240]
+    </footer>
+
     <script>
         async function getSentiment() {
-            const text = document.getElementById('text_input').value;
+            // Get user input
+            const text = document.getElementById('text_input').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            // Clear previous results
+            resultDiv.innerHTML = '';
 
-            const response = await fetch('/analyze', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ text: text })
-            });
+            // Validate input
+            if (!text) {
+                resultDiv.innerHTML = `<p style="color: red;">Please enter some text!</p>`;
+                return;
+            }
 
-            const result = await response.json();
-            document.getElementById('result').innerHTML = 
-                `<p>Sentiment: ${result.sentiment}</p><p>Score: ${result.score}</p>`;
+            // Call API
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text }),
+                });
+
+                const result = await response.json();
+
+                // Handle errors
+                if (response.status !== 200) {
+                    resultDiv.innerHTML = `<p style="color: red;">${result.error || 'An error occurred.'}</p>`;
+                    return;
+                }
+
+                // Display results
+                resultDiv.innerHTML = `
+                    <p>Sentiment: <span style="color: ${
+                        result.sentiment === 'Positive' ? 'green' : result.sentiment === 'Negative' ? 'red' : 'gray'
+                    }">${result.sentiment}</span></p>
+                    <p>Score: ${result.score.toFixed(2)}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">An unexpected error occurred. Please try again later.</p>`;
+            }
         }
     </script>
 </body>
